@@ -5,6 +5,8 @@ import com.hiring.authms.domain.dto.AuthResponse;
 import com.hiring.authms.domain.dto.RegisterRequest;
 import com.hiring.authms.domain.dto.RegisterResponse;
 import com.hiring.authms.domain.mapper.UserMapper;
+import com.hiring.authms.exception.LoginException;
+import com.hiring.authms.exception.RegisterException;
 import com.hiring.authms.repository.UserDetailsRepository;
 import com.hiring.authms.util.JwtUtil;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -28,21 +30,29 @@ public class AuthService {
         this.userMapper = userMapper;
     }
 
-    public AuthResponse authenticate(AuthRequest authRequest) {
-        authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(authRequest.username(),
-                        authRequest.password())
-        );
-        return new AuthResponse(jwtUtil.generateToken(authRequest.username()));
+    public AuthResponse login(AuthRequest authRequest) {
+        try{
+            authenticate(authRequest.username(), authRequest.password());
+            return new AuthResponse(jwtUtil.generateToken(authRequest.username()));
+        } catch (Exception e) {
+            throw new LoginException(e.getMessage());
+        }
     }
 
     public RegisterResponse register(RegisterRequest registerRequest){
-        userDetailsRepository.save(userMapper.toUser(registerRequest));
+        try{
+            userDetailsRepository.save(userMapper.toUser(registerRequest));
 
+            authenticate(registerRequest.username(), registerRequest.password());
+            return new RegisterResponse(true, jwtUtil.generateToken(registerRequest.username()));
+        } catch (Exception e) {
+            throw new RegisterException(e.getMessage());
+        }
+    }
+
+    private void authenticate(String username, String password) {
         authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(registerRequest.username(),
-                        registerRequest.password())
+                new UsernamePasswordAuthenticationToken(username, password)
         );
-        return new RegisterResponse(true, jwtUtil.generateToken(registerRequest.username()));
     }
 }
