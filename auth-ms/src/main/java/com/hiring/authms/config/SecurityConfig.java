@@ -12,6 +12,7 @@ import org.springframework.security.authentication.dao.DaoAuthenticationProvider
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
@@ -31,10 +32,10 @@ public class SecurityConfig {
 
     @Bean
     public SecurityFilterChain securityFilterChain(final HttpSecurity http) throws Exception {
-        http.
-            httpBasic(Customizer.withDefaults())
+        http
+            .csrf(AbstractHttpConfigurer::disable)
             .authorizeHttpRequests(authReq -> authReq
-                    .requestMatchers("/auth/**").permitAll()
+                    .requestMatchers("/api/auth/**").permitAll()
             .anyRequest().authenticated());
 
         return http.build();
@@ -59,10 +60,10 @@ public class SecurityConfig {
     @Bean
     public CommandLineRunner createAdmin(PasswordEncoder passwordEncoder) {
         return args -> {
-            if (userDetailsRepository.findByUsername("admin").isEmpty()) {
+            if (userDetailsRepository.findByUsername("admin123").isEmpty()) {
                 User admin = new User();
-                admin.setUsername("admin");
-                admin.setPassword(passwordEncoder.encode("admin"));
+                admin.setUsername("admin123");
+                admin.setPassword(passwordEncoder.encode("admin123"));
                 admin.setRole("ADMIN");
                 userDetailsRepository.save(admin);
             }
