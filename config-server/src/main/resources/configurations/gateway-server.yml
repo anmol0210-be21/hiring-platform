@@ -9,6 +9,10 @@ spring:
           uri: lb://AUTH-MS
           predicates:
             - Path=/api/auth/**
+        - id: candidate-ms
+          uri: lb://CANDIDATE-MS
+          predicates:
+            - Path=/api/candidate/**
 
 server:
   port: 8222
