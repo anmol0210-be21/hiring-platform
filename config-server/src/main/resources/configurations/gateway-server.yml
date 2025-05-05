@@ -12,7 +12,7 @@ spring:
         - id: candidate-ms
           uri: lb://CANDIDATE-MS
           predicates:
-            - Path=/api/candidate/**
+            - Path=/api/candidates/**
 
 server:
   port: 8222
