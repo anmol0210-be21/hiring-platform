@@ -2,6 +2,8 @@ package com.hiring.authms.controller;
 
 import com.hiring.authms.domain.dto.AuthRequest;
 import com.hiring.authms.domain.dto.AuthResponse;
+import com.hiring.authms.domain.dto.RegisterRequest;
+import com.hiring.authms.domain.dto.RegisterResponse;
 import com.hiring.authms.service.AuthService;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
@@ -24,8 +26,13 @@ public class AuthController {
 
     @PostMapping("/login")
     public ResponseEntity<AuthResponse> login(@RequestBody @Valid final AuthRequest authRequest) {
-        log.info("Login request: {}", authRequest);
-        AuthResponse token = authService.authenticate(authRequest);
-        return new ResponseEntity<>(token, HttpStatus.OK);
+        AuthResponse authResponse = authService.authenticate(authRequest);
+        return new ResponseEntity<>(authResponse, HttpStatus.OK);
+    }
+
+    @PostMapping("/register")
+    public ResponseEntity<RegisterResponse> register(@RequestBody @Valid final RegisterRequest registerRequest) {
+        RegisterResponse registerResponse = authService.register(registerRequest);
+        return new ResponseEntity<>(registerResponse, HttpStatus.OK);
     }
 }
