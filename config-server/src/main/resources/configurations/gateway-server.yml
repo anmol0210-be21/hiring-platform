@@ -1,0 +1,11 @@
+spring:
+  cloud:
+    gateway:
+      discovery:
+        locator:
+          enabled: true
+      routes:
+        - id: auth-ms
+          uri: lb://AUTH-MS
+          predicates:
+            - Path=/api/auth/**
