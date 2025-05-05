@@ -4,6 +4,7 @@ import com.hiring.authms.domain.dto.AuthRequest;
 import com.hiring.authms.domain.dto.AuthResponse;
 import com.hiring.authms.domain.dto.RegisterRequest;
 import com.hiring.authms.domain.dto.RegisterResponse;
+import com.hiring.authms.domain.entity.User;
 import com.hiring.authms.domain.mapper.UserMapper;
 import com.hiring.authms.exception.LoginException;
 import com.hiring.authms.exception.RegisterException;
@@ -32,8 +33,9 @@ public class AuthService {
 
     public AuthResponse login(AuthRequest authRequest) {
         try{
-            authenticate(authRequest.username(), authRequest.password());
-            return new AuthResponse(jwtUtil.generateToken(authRequest.username()));
+            User user = authenticate(authRequest.username(), authRequest.password());
+
+            return new AuthResponse(jwtUtil.generateToken(user));
         } catch (Exception e) {
             throw new LoginException(e.getMessage());
         }
@@ -43,16 +45,19 @@ public class AuthService {
         try{
             userDetailsRepository.save(userMapper.toUser(registerRequest));
 
-            authenticate(registerRequest.username(), registerRequest.password());
-            return new RegisterResponse(true, jwtUtil.generateToken(registerRequest.username()));
+            User user = authenticate(registerRequest.username(), registerRequest.password());
+            return new RegisterResponse(true, jwtUtil.generateToken(user));
         } catch (Exception e) {
             throw new RegisterException(e.getMessage());
         }
     }
 
-    private void authenticate(String username, String password) {
+    private User authenticate(String username, String password) {
         authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(username, password)
         );
+        return userDetailsRepository.findByUsername(username)
+                .orElseThrow(() -> new LoginException("User not found"));
+
     }
 }

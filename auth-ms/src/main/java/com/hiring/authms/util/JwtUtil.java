@@ -1,5 +1,6 @@
 package com.hiring.authms.util;
 
+import com.hiring.authms.domain.entity.User;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
@@ -14,11 +15,13 @@ public class JwtUtil {
     private final String SECRET = "supersecretkeyformyjwt1234567890!";
     private final SecretKey SECRET_KEY = Keys.hmacShaKeyFor(SECRET.getBytes());
 
-    public String generateToken(String username) {
+    public String generateToken(User user) {
         final long EXPIRES_IN = 1000 * 60 * 60;
 
         return Jwts.builder()
-                .subject(username)
+                .subject(user.getUsername())
+                .claim("userId", user.getId().toString())
+                .claim("role", user.getRole())
                 .issuedAt(new Date(System.currentTimeMillis()))
                 .expiration(new Date(System.currentTimeMillis()  + EXPIRES_IN))
                 .signWith(SECRET_KEY)
