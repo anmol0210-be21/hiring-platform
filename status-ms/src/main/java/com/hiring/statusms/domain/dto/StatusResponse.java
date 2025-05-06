@@ -7,6 +7,7 @@ import java.util.UUID;
 
 public record StatusResponse(
         UUID id,
+        UUID candidateId,
         StatusType statusType
 ) implements Serializable {
 }

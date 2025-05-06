@@ -8,10 +8,12 @@ import org.springframework.data.mongodb.core.mapping.Document;
 import java.util.UUID;
 
 @Data
-@Document(collection = "hiring_status")
+@Document(collection = "status")
 public class Status {
     @Id
     private UUID id;
+
+    private UUID candidateId;
 
     private StatusType statusType;
 
