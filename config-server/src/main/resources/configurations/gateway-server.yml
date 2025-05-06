@@ -13,6 +13,10 @@ spring:
           uri: lb://CANDIDATE-MS
           predicates:
             - Path=/api/candidates/**
+        - id: status-ms
+          uri: lb://STATUS-MS
+          predicates:
+            - Path=/api/status/**
 
 server:
   port: 8222
