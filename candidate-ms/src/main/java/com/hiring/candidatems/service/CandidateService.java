@@ -2,27 +2,31 @@ package com.hiring.candidatems.service;
 
 import com.hiring.candidatems.domain.dto.CandidateRequest;
 import com.hiring.candidatems.domain.dto.CandidateResponse;
+import com.hiring.candidatems.domain.dto.HiringStatusMessage;
 import com.hiring.candidatems.domain.entity.Candidate;
 import com.hiring.candidatems.domain.mapper.CandidateMapper;
 import com.hiring.candidatems.exception.CandidateException;
 import com.hiring.candidatems.repository.CandidateRepository;
+import com.hiring.candidatems.service.producer.StatusProducerService;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.UUID;
 
-
-// TODO: implement status microservice calls to init status
-
 @Service
+@Transactional
 public class CandidateService {
     private final CandidateRepository candidateRepository;
     private final CandidateMapper candidateMapper;
+    private final StatusProducerService statusProducerService;
 
     public CandidateService(final CandidateRepository candidateRepository,
-                            final CandidateMapper candidateMapper) {
+                            final CandidateMapper candidateMapper,
+                            final StatusProducerService statusProducerService) {
         this.candidateRepository = candidateRepository;
         this.candidateMapper = candidateMapper;
+        this.statusProducerService = statusProducerService;
     }
 
     public List<CandidateResponse> findAll() {
@@ -42,6 +46,14 @@ public class CandidateService {
     public CandidateResponse add(final CandidateRequest request) {
         Candidate candidate = candidateMapper.toCandidate(request);
         candidate = candidateRepository.save(candidate);
+
+        HiringStatusMessage hiringStatusMessage = new HiringStatusMessage(
+                "hiringStatusTopicExchange",
+                "status.init",
+                candidate.getId()
+        );
+        statusProducerService.sendMessageToStatusMS(hiringStatusMessage);
+
         return candidateMapper.toCandidateResponse(candidate);
     }
 
