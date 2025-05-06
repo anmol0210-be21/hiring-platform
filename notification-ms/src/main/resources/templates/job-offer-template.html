@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="'Job Offer - ' + ${email.companyName}">Job Offer</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+        }
+        .header {
+            background-color: #0066CC;
+            color: white;
+            padding: 10px;
+            text-align: center;
+        }
+        .content {
+            margin: 20px;
+        }
+        .footer {
+            font-size: 0.8em;
+            color: #888;
+            text-align: center;
+            margin-top: 20px;
+        }
+        .offer-details {
+            background-color: #f9f9f9;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 10px 0;
+        }
+        .offer-details h3 {
+            margin-top: 0;
+        }
+        .offer-details p {
+            margin: 5px 0;
+        }
+    </style>
+</head>
+<body>
+<div class="header">
+    <h1 th:text="${email.companyName}">Company Name</h1>
+    <p>We are excited to offer you a position with our team!</p>
+</div>
+
+<div class="content">
+    <p th:text="'Dear ' + ${email.candidateName} + ','">Dear Candidate,</p>
+
+    <p>
+        We are pleased to extend the following offer for you to join our team as a
+        <strong th:text="${email.position}">Position</strong> at
+        <strong th:text="${email.companyName}">Company</strong>.
+    </p>
+
+    <div class="offer-details">
+        <h3>Job Offer Details:</h3>
+        <p><strong>Position:</strong> <span th:text="${email.position}">Position</span></p>
+        <p><strong>Start Date:</strong> <span th:text="${email.startDate}">Start Date</span></p>
+        <p><strong>Salary:</strong> <span th:text="${email.salary}">Salary</span></p>
+        <p><strong>Location:</strong> <span th:text="${email.location}">Location</span></p>
+        <p><strong>Benefits:</strong> <span th:text="${email.benefits}">Benefits</span></p>
+    </div>
+
+    <p>
+        Please review the offer details and let us know if you have any questions. We are excited
+        about the possibility of you joining our team!
+    </p>
+
+    <p>
+        To accept the offer, please reply to this email or contact us at
+        <a th:href="'mailto:' + ${email.companyEmail}" th:text="${email.companyEmail}">company@example.com</a>
+        with any questions or clarifications.
+    </p>
+
+    <p>We look forward to hearing from you soon.</p>
+
+    <p>Sincerely,</p>
+    <p><strong th:text="${email.companyName}">Company Name</strong></p>
+</div>
+
+<div class="footer">
+    <p>
+        If you have any questions about this offer, feel free to reach out to us at
+        <a th:href="'mailto:' + ${email.companyEmail}" th:text="${email.companyEmail}">company@example.com</a>
+    </p>
+    <p>
+        Visit our website:
+        <a th:href="${email.companyWebsite}" th:text="${email.companyWebsite}" target="_blank">company.com</a>
+    </p>
+</div>
+</body>
+</html>
