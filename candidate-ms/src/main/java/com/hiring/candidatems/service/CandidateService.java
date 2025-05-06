@@ -4,6 +4,7 @@ import com.hiring.candidatems.domain.dto.CandidateRequest;
 import com.hiring.candidatems.domain.dto.CandidateResponse;
 import com.hiring.candidatems.domain.entity.Candidate;
 import com.hiring.candidatems.domain.mapper.CandidateMapper;
+import com.hiring.candidatems.exception.CandidateException;
 import com.hiring.candidatems.repository.CandidateRepository;
 import org.springframework.stereotype.Service;
 
@@ -33,7 +34,7 @@ public class CandidateService {
     public CandidateResponse findById(final UUID id) {
         return candidateMapper.toCandidateResponse(
                 candidateRepository.findById(id).orElseThrow(
-                        () -> new RuntimeException("Could not find candidate with id: " + id)
+                        () -> new CandidateException("Could not find candidate with id: " + id)
                 )
         );
     }
@@ -46,14 +47,14 @@ public class CandidateService {
 
     public CandidateResponse update(final CandidateRequest request, final UUID id) {
         Candidate candidate = candidateMapper.toCandidate(request);
-        candidate.setId(candidate.getId());
+        candidate.setId(id);
         candidate = candidateRepository.save(candidate);
         return candidateMapper.toCandidateResponse(candidate);
     }
 
     public void delete(final UUID id) {
         if (!candidateRepository.existsById(id)) {
-            throw new RuntimeException("Could not find candidate with id: " + id);
+            throw new CandidateException("Could not find candidate with id: " + id);
         }
         candidateRepository.deleteById(id);
     }
