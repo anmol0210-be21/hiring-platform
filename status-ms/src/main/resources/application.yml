@@ -1,1 +1,5 @@
-spring.application.name=status-ms
+spring:
+  config:
+    import: optional:configserver:http://localhost:8080
+  application:
+    name: status-ms
