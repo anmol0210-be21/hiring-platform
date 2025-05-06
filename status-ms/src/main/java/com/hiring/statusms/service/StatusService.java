@@ -1,5 +1,6 @@
 package com.hiring.statusms.service;
 
+import com.hiring.statusms.domain.dto.NotificationMessage;
 import com.hiring.statusms.domain.dto.StatusRequest;
 import com.hiring.statusms.domain.dto.StatusResponse;
 import com.hiring.statusms.domain.entity.Status;
@@ -7,20 +8,26 @@ import com.hiring.statusms.domain.enums.StatusType;
 import com.hiring.statusms.domain.mapper.StatusMapper;
 import com.hiring.statusms.exception.StatusException;
 import com.hiring.statusms.repository.StatusRepository;
+import com.hiring.statusms.service.producer.NotificationProducerService;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.UUID;
 
 @Service
+@Transactional
 public class StatusService {
     private final StatusRepository statusRepository;
     private final StatusMapper statusMapper;
+    private final NotificationProducerService notificationProducerService;
 
     public StatusService(final StatusRepository statusRepository,
-                         final StatusMapper statusMapper) {
+                         final StatusMapper statusMapper,
+                         final NotificationProducerService notificationProducerService) {
         this.statusRepository = statusRepository;
         this.statusMapper = statusMapper;
+        this.notificationProducerService = notificationProducerService;
     }
 
     public List<StatusResponse> getAll() {
@@ -31,8 +38,8 @@ public class StatusService {
 
     public StatusResponse getById(final UUID id) {
         return statusMapper.toResponse(
-                statusRepository.findById(id)
-                        .orElseThrow(() -> new StatusException("Status by Id: " + id + " not found"))
+                statusRepository.findByCandidateId(id)
+                        .orElseThrow(() -> new StatusException("Status for Candidate Id: " + id + " not found"))
         );
     }
 
@@ -43,11 +50,11 @@ public class StatusService {
     }
 
     public StatusResponse update(final StatusRequest statusRequest, final UUID id) {
-        Status currentStatus = statusRepository.findById(id)
-                .orElseThrow(() -> new StatusException("Status by Id: " + id + " not found"));
+        Status currentStatus = statusRepository.findByCandidateId(id)
+                .orElseThrow(() -> new StatusException("Status for Candidate Id: " + id + " not found"));
 
         Status updatedStatus = statusMapper.toStatus(statusRequest);
-        updatedStatus.setId(id);
+        updatedStatus.setId(currentStatus.getId());
 
         StatusType currentStatusType = currentStatus.getStatusType();
         StatusType updatedStatusType = updatedStatus.getStatusType();
@@ -58,13 +65,26 @@ public class StatusService {
         }
 
         updatedStatus = statusRepository.save(updatedStatus);
+
+        if (updatedStatus.getStatusType().equals(StatusType.OFFERED)) {
+            notificationProducerService.sendMessageToNotificationMS(
+                    new NotificationMessage(
+                            "hiringNotificationTopicExchange",
+                            "notification.offered",
+                            updatedStatus.getId(),
+                            updatedStatus.getCandidateId(),
+                            updatedStatus.getStatusType()
+                    )
+            );
+        }
+
         return statusMapper.toResponse(updatedStatus);
     }
 
     public void delete(final UUID id) {
-        if (!statusRepository.existsById(id)) {
-            throw new StatusException("Status by Id: " + id + " not found");
+        if (!statusRepository.existsByCandidateId(id)) {
+            throw new StatusException("Status for Candidate Id: " + id + " not found");
         }
-        statusRepository.deleteById(id);
+        statusRepository.deleteByCandidateId(id);
     }
 }

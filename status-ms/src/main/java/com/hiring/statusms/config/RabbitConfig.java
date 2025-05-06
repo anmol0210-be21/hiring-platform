@@ -47,4 +47,23 @@ public class RabbitConfig {
                 .to(statusTopicExchange())
                 .with("status.*");
     }
+
+
+    @Bean
+    public Queue notificationQueue() {
+        return new Queue("hiringNotificationQueue", true);
+    }
+
+    @Bean
+    public TopicExchange notificationTopicExchange() {
+        return new TopicExchange("hiringNotificationTopicExchange");
+    }
+
+    @Bean
+    public Binding notificationBinding() {
+        return BindingBuilder
+                .bind(notificationQueue())
+                .to(notificationTopicExchange())
+                .with("notification.*");
+    }
 }
