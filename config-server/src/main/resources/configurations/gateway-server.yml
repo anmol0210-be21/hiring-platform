@@ -17,6 +17,10 @@ spring:
           uri: lb://STATUS-MS
           predicates:
             - Path=/api/status/**
+        - id: notification-ms
+          uri: lb://NOTIFICATION-MS
+          predicates:
+            - Path=/api/notification/**
 
 server:
   port: 8222
