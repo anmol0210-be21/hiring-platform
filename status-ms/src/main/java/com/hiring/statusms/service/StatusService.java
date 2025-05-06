@@ -3,7 +3,9 @@ package com.hiring.statusms.service;
 import com.hiring.statusms.domain.dto.StatusRequest;
 import com.hiring.statusms.domain.dto.StatusResponse;
 import com.hiring.statusms.domain.entity.Status;
+import com.hiring.statusms.domain.enums.StatusType;
 import com.hiring.statusms.domain.mapper.StatusMapper;
+import com.hiring.statusms.exception.StatusException;
 import com.hiring.statusms.repository.StatusRepository;
 import org.springframework.stereotype.Service;
 
@@ -30,7 +32,7 @@ public class StatusService {
     public StatusResponse getById(final UUID id) {
         return statusMapper.toResponse(
                 statusRepository.findById(id)
-                        .orElseThrow(() -> new RuntimeException("Status by Id: " + id + " not found"))
+                        .orElseThrow(() -> new StatusException("Status by Id: " + id + " not found"))
         );
     }
 
@@ -41,15 +43,27 @@ public class StatusService {
     }
 
     public StatusResponse update(final StatusRequest statusRequest, final UUID id) {
-        Status status = statusMapper.toStatus(statusRequest);
-        status.setId(id);
-        status = statusRepository.save(status);
-        return statusMapper.toResponse(status);
+        Status currentStatus = statusRepository.findById(id)
+                .orElseThrow(() -> new StatusException("Status by Id: " + id + " not found"));
+
+        Status updatedStatus = statusMapper.toStatus(statusRequest);
+        updatedStatus.setId(id);
+
+        StatusType currentStatusType = currentStatus.getStatusType();
+        StatusType updatedStatusType = updatedStatus.getStatusType();
+
+        boolean canTransition = currentStatusType.canTransitionTo(updatedStatusType);
+        if (!canTransition) {
+            throw new StatusException("Can't change status type: " + currentStatusType + " to " + updatedStatusType);
+        }
+
+        updatedStatus = statusRepository.save(updatedStatus);
+        return statusMapper.toResponse(updatedStatus);
     }
 
     public void delete(final UUID id) {
         if (!statusRepository.existsById(id)) {
-            throw new RuntimeException("Status by Id: " + id + " not found");
+            throw new StatusException("Status by Id: " + id + " not found");
         }
         statusRepository.deleteById(id);
     }

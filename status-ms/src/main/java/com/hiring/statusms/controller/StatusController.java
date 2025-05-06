@@ -22,9 +22,6 @@ public class StatusController {
 
     @GetMapping("/all")
     public ResponseEntity<List<StatusResponse>> getAllStatus() {
-        System.out.println(System.getenv("MONGO_USER"));
-        System.out.println(System.getenv("USERNAME"));
-
         return new ResponseEntity<>(statusService.getAll(), HttpStatus.OK);
     }
 
@@ -34,12 +31,13 @@ public class StatusController {
     }
 
     @PostMapping("/add")
-    public ResponseEntity<StatusResponse> addStatus(@Valid final StatusRequest statusRequest) {
+    public ResponseEntity<StatusResponse> addStatus(@RequestBody @Valid final StatusRequest statusRequest) {
+        System.out.println(statusRequest.statusType());
         return new ResponseEntity<>(statusService.add(statusRequest), HttpStatus.CREATED);
     }
 
     @PutMapping("/update/{id}")
-    public ResponseEntity<StatusResponse> updateStatus(@Valid final StatusRequest statusRequest, @PathVariable @Valid final UUID id) {
+    public ResponseEntity<StatusResponse> updateStatus(@RequestBody @Valid final StatusRequest statusRequest, @PathVariable @Valid final UUID id) {
         return new ResponseEntity<>(statusService.update(statusRequest, id), HttpStatus.OK);
     }
 
