@@ -33,4 +33,14 @@ public class GlobalException extends RuntimeException {
     public ResponseEntity<Object> handleCandidateException(final CandidateException ex) {
         return new ResponseEntity<>(ex.getMessage(), HttpStatus.BAD_REQUEST);
     }
+
+    @ExceptionHandler(BankInfoException.class)
+    public ResponseEntity<Object> handleBankInfoException(final BankInfoException ex) {
+        return new ResponseEntity<>(ex.getMessage(), HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(EducationInfoException.class)
+    public ResponseEntity<Object> handleEducationInfoException(final EducationInfoException ex) {
+        return new ResponseEntity<>(ex.getMessage(), HttpStatus.BAD_REQUEST);
+    }
 }
