@@ -1,1 +1,5 @@
-spring.application.name=document-ms
+spring:
+  application:
+    name: document-ms
+  config:
+    import: optional:configserver:http://localhost:8080
