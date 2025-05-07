@@ -19,8 +19,8 @@ spring:
             - Path=/api/status/**
         - id: document-ms
           uri: lb://DOCUMENT-MS
-          predicate:
-            - Path=/api/document/**
+          predicates:
+            - Path=/api/documents/**
 #        - id: notification-ms
 #          uri: lb://NOTIFICATION-MS
 #          predicates:
