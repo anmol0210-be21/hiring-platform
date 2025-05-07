@@ -11,7 +11,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 @ControllerAdvice
-public class GlobalExceptionHandler {
+public class GlobalException extends RuntimeException {
     @ExceptionHandler(IOException.class)
     public ResponseEntity<Map<String, String>> handleIOException(IOException ex) {
         Map<String, String> errorResponse = new HashMap<>();
@@ -37,5 +37,11 @@ public class GlobalExceptionHandler {
         errorResponse.put("message", ex.getMessage());
         
         return new ResponseEntity<>(errorResponse, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+
+
+    @ExceptionHandler(DocumentException.class)
+    public ResponseEntity<String> handleDocumentException(DocumentException ex) {
+        return new ResponseEntity<>(ex.getMessage(), HttpStatus.BAD_REQUEST);
     }
 }

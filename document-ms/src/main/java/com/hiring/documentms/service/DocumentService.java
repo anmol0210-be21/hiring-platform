@@ -5,6 +5,7 @@ import com.hiring.documentms.domain.dto.UploadedDocumentResponse;
 import com.hiring.documentms.domain.dto.UploadedDocumentResponse.FileMetadataResponse;
 import com.hiring.documentms.domain.entity.UploadedDocument;
 import com.hiring.documentms.domain.entity.UploadedDocument.FileMetadata;
+import com.hiring.documentms.exception.DocumentException;
 import com.hiring.documentms.repository.UploadedDocumentRepository;
 import com.mongodb.client.gridfs.model.GridFSFile;
 import org.springframework.core.io.InputStreamResource;
@@ -37,21 +38,25 @@ public class DocumentService {
         this.uploadedDocumentRepository = uploadedDocumentRepository;
     }
 
+    public void addDocument(final UUID candidateId) {
+        boolean exists = uploadedDocumentRepository.findByCandidateId(candidateId).isPresent();
+        if (!exists) {
+            UploadedDocument uploadedDocument = new UploadedDocument();
+            uploadedDocument.setCandidateId(candidateId);
+            uploadedDocument.setFiles(new ArrayList<>());
+            uploadedDocumentRepository.save(uploadedDocument);
+        }
+    }
+
     public UploadedDocumentResponse uploadDocuments(UploadedDocumentRequest request) throws IOException {
         Optional<UploadedDocument> existingDocumentOpt = uploadedDocumentRepository
                 .findByCandidateId(request.candidateId());
 
-        UploadedDocument uploadedDocument;
-        if (existingDocumentOpt.isPresent()) {
-            uploadedDocument = existingDocumentOpt.get();
-            if (uploadedDocument.getFiles() == null) {
-                uploadedDocument.setFiles(new ArrayList<>());
-            }
-        } else {
-            uploadedDocument = new UploadedDocument();
-            uploadedDocument.setCandidateId(request.candidateId());
-            uploadedDocument.setFiles(new ArrayList<>());
+        if (existingDocumentOpt.isEmpty()) {
+            throw new DocumentException("Document not initialized for candidate: " + request.candidateId());
         }
+
+        UploadedDocument uploadedDocument = existingDocumentOpt.get();
 
         for (MultipartFile file : request.files()) {
             String fileId = uploadFile(file);
