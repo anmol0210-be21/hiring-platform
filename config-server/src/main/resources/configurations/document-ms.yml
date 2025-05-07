@@ -1,0 +1,7 @@
+spring:
+  data:
+    mongodb:
+      uri: mongodb+srv://${MONGO_USER}:${MONGO_PASSWORD}@default.akmmhq0.mongodb.net/hiring_document?retryWrites=true&w=majority&appName=Default
+
+server:
+  port: 8084
