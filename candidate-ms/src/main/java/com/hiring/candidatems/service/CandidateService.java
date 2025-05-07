@@ -2,11 +2,13 @@ package com.hiring.candidatems.service;
 
 import com.hiring.candidatems.domain.dto.CandidateRequest;
 import com.hiring.candidatems.domain.dto.CandidateResponse;
+import com.hiring.candidatems.domain.dto.DocumentMessage;
 import com.hiring.candidatems.domain.dto.HiringStatusMessage;
 import com.hiring.candidatems.domain.entity.Candidate;
 import com.hiring.candidatems.domain.mapper.CandidateMapper;
 import com.hiring.candidatems.exception.CandidateException;
 import com.hiring.candidatems.repository.CandidateRepository;
+import com.hiring.candidatems.service.producer.DocumentProducerService;
 import com.hiring.candidatems.service.producer.StatusProducerService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -20,13 +22,16 @@ public class CandidateService {
     private final CandidateRepository candidateRepository;
     private final CandidateMapper candidateMapper;
     private final StatusProducerService statusProducerService;
+    private final DocumentProducerService documentProducerService;
 
     public CandidateService(final CandidateRepository candidateRepository,
                             final CandidateMapper candidateMapper,
-                            final StatusProducerService statusProducerService) {
+                            final StatusProducerService statusProducerService,
+                            final DocumentProducerService documentProducerService) {
         this.candidateRepository = candidateRepository;
         this.candidateMapper = candidateMapper;
         this.statusProducerService = statusProducerService;
+        this.documentProducerService = documentProducerService;
     }
 
     public List<CandidateResponse> findAll() {
@@ -53,6 +58,13 @@ public class CandidateService {
                 candidate.getId()
         );
         statusProducerService.sendMessageToStatusMS(hiringStatusMessage);
+
+        DocumentMessage documentMessage = new DocumentMessage(
+                "hiringDocumentTopicExchange",
+                "document.init",
+                candidate.getId()
+        );
+        documentProducerService.sendMessageToDocumentMS(documentMessage);
 
         return candidateMapper.toCandidateResponse(candidate);
     }

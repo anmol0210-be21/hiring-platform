@@ -46,4 +46,22 @@ public class RabbitConfig {
                 .to(statusTopicExchange())
                 .with("status.*");
     }
+
+    @Bean
+    public Queue documentQueue() {
+        return new Queue("hiringDocumentQueue", true);
+    }
+
+    @Bean
+    public TopicExchange documentTopicExchange() {
+        return new TopicExchange("hiringDocumentTopicExchange");
+    }
+
+    @Bean
+    public Binding documentBinding() {
+        return BindingBuilder
+                .bind(documentQueue())
+                .to(documentTopicExchange())
+                .with("document.*");
+    }
 }
