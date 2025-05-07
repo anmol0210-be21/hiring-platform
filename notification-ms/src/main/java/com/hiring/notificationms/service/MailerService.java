@@ -1,6 +1,8 @@
 package com.hiring.notificationms.service;
 
 import com.hiring.notificationms.domain.dto.JobOfferEmail;
+import com.hiring.notificationms.domain.entity.OfferNotification;
+import com.hiring.notificationms.repository.OfferNotificationRepository;
 import jakarta.mail.internet.MimeMessage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -11,17 +13,21 @@ import org.thymeleaf.TemplateEngine;
 import org.thymeleaf.context.Context;
 
 import java.nio.charset.StandardCharsets;
+import java.util.UUID;
 
 @Service
 public class MailerService {
     private static final Logger log = LoggerFactory.getLogger(MailerService.class);
     private final JavaMailSender mailSender;
     private final TemplateEngine templateEngine;
+    private final OfferNotificationRepository offerNotificationRepository;
 
     public MailerService(final JavaMailSender mailSender,
-                         final TemplateEngine templateEngine) {
+                         final TemplateEngine templateEngine,
+                         final OfferNotificationRepository offerNotificationRepository) {
         this.mailSender = mailSender;
         this.templateEngine = templateEngine;
+        this.offerNotificationRepository = offerNotificationRepository;
     }
 
     public void sendJobOfferMail(JobOfferEmail jobOfferEmail) {
@@ -39,9 +45,17 @@ public class MailerService {
             helper.setText(htmlContent, true);
 
             mailSender.send(message);
-            log.info("Mail sent successfully");
+
+            saveOfferNotification(jobOfferEmail.candidateId());
         } catch (Exception e) {
             log.error(e.getMessage());
         }
+    }
+
+    private void saveOfferNotification(UUID candidateId) {
+        OfferNotification offerNotification = new OfferNotification();
+        offerNotification.setCandidateId(candidateId);
+
+        offerNotificationRepository.save(offerNotification);
     }
 }

@@ -1,20 +1,29 @@
 package com.hiring.notificationms.service;
 
 import com.hiring.notificationms.client.CandidateClient;
+import com.hiring.notificationms.domain.dto.OfferNotificationResponse;
+import com.hiring.notificationms.domain.entity.OfferNotification;
 import com.hiring.notificationms.domain.dto.CandidateResponse;
 import com.hiring.notificationms.domain.dto.JobOfferEmail;
 import com.hiring.notificationms.domain.dto.NotificationMessage;
+import com.hiring.notificationms.repository.OfferNotificationRepository;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+import java.util.UUID;
+
 @Service
-public class NotificationService {
+public class OfferNotificationService {
     private final MailerService mailerService;
     private final CandidateClient candidateClient;
+    private final OfferNotificationRepository offerNotificationRepository;
 
-    public NotificationService(final MailerService mailerService,
-                               final CandidateClient candidateClient) {
+    public OfferNotificationService(final MailerService mailerService,
+                                    final CandidateClient candidateClient,
+                                    final OfferNotificationRepository offerNotificationRepository) {
         this.mailerService = mailerService;
         this.candidateClient = candidateClient;
+        this.offerNotificationRepository = offerNotificationRepository;
     }
 
     public void sendJobOffer(NotificationMessage notificationMessage) {
@@ -26,6 +35,7 @@ public class NotificationService {
 
         mailerService.sendJobOfferMail(
                 new JobOfferEmail(
+                        candidateResponse.id(),
                         candidateResponse.email(),
                         "Job Offer - CIA",
                         candidateResponse.firstName() + " " + candidateResponse.lastName(),
@@ -38,6 +48,21 @@ public class NotificationService {
                         "cia.gov",
                         "CIA"
                 )
+        );
+    }
+
+    public List<OfferNotificationResponse> getAllOfferNotifications() {
+        List<OfferNotification> offerNotifications = offerNotificationRepository.findAll();
+
+        return offerNotifications.stream()
+                .map(this::maptoOfferNotificationResponse).toList();
+    }
+
+    private OfferNotificationResponse maptoOfferNotificationResponse(final OfferNotification offerNotification) {
+        return new OfferNotificationResponse(
+                offerNotification.getId(),
+                offerNotification.getCandidateId(),
+                offerNotification.getSentAt()
         );
     }
 }
