@@ -13,6 +13,9 @@ public class NotificationProducerService {
     }
 
     public void sendMessageToNotificationMS(NotificationMessage message) {
-        rabbitTemplate.convertAndSend(message.exchange(), message.routingKey(), message);
+        rabbitTemplate.convertAndSend(message.exchange(), message.routingKey(), message, msg -> {
+            msg.getMessageProperties().setHeader("Authorization", "Bearer " + message.jwtToken());
+            return msg;
+        });
     }
 }

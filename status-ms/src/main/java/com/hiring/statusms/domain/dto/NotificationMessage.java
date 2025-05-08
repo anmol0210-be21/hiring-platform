@@ -9,6 +9,7 @@ public record NotificationMessage(
         String routingKey,
         UUID statusId,
         UUID candidateId,
-        StatusType statusType
+        StatusType statusType,
+        String jwtToken
 ) {
 }

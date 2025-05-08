@@ -3,6 +3,7 @@ package com.hiring.documentms.controller;
 import com.hiring.documentms.domain.dto.UploadedDocumentRequest;
 import com.hiring.documentms.domain.dto.UploadedDocumentResponse;
 import com.hiring.documentms.service.DocumentService;
+import jakarta.validation.Valid;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -26,7 +27,7 @@ public class DocumentController {
 
     @PostMapping(value = "/upload/{candidateId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<UploadedDocumentResponse> uploadDocuments(
-            @PathVariable UUID candidateId,
+            @Valid @PathVariable UUID candidateId,
             @RequestParam("files") List<MultipartFile> files) throws IOException {
         
         if (files.isEmpty()) {
@@ -40,13 +41,13 @@ public class DocumentController {
     }
 
     @GetMapping("/{candidateId}")
-    public ResponseEntity<UploadedDocumentResponse> getDocumentsByCandidateId(@PathVariable UUID candidateId) {
+    public ResponseEntity<UploadedDocumentResponse> getDocumentsByCandidateId(@Valid @PathVariable UUID candidateId) {
         Optional<UploadedDocumentResponse> response = documentService.getDocumentsByCandidateId(candidateId);
         return response.map(ResponseEntity::ok).orElse(ResponseEntity.notFound().build());
     }
 
     @GetMapping("/download/{fileId}")
-    public ResponseEntity<InputStreamResource> downloadDocument(@PathVariable String fileId) throws IOException {
+    public ResponseEntity<InputStreamResource> downloadDocument(@Valid @PathVariable String fileId) throws IOException {
         return documentService.downloadDocument(fileId);
     }
 }

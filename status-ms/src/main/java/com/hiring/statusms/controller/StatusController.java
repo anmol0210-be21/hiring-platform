@@ -3,6 +3,7 @@ package com.hiring.statusms.controller;
 import com.hiring.statusms.domain.dto.StatusRequest;
 import com.hiring.statusms.domain.dto.StatusResponse;
 import com.hiring.statusms.service.StatusService;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -37,8 +38,8 @@ public class StatusController {
     }
 
     @PutMapping("/update/{id}")
-    public ResponseEntity<StatusResponse> updateStatus(@RequestBody @Valid final StatusRequest statusRequest, @PathVariable @Valid final UUID id) {
-        return new ResponseEntity<>(statusService.update(statusRequest, id), HttpStatus.OK);
+    public ResponseEntity<StatusResponse> updateStatus(HttpServletRequest request, @RequestBody @Valid final StatusRequest statusRequest, @PathVariable @Valid final UUID id) {
+        return new ResponseEntity<>(statusService.update(statusRequest, id, request), HttpStatus.OK);
     }
 
     @DeleteMapping("/delete/{id}")

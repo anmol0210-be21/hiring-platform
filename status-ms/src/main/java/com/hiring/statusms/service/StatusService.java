@@ -9,6 +9,7 @@ import com.hiring.statusms.domain.mapper.StatusMapper;
 import com.hiring.statusms.exception.StatusException;
 import com.hiring.statusms.repository.StatusRepository;
 import com.hiring.statusms.service.producer.NotificationProducerService;
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -49,7 +50,7 @@ public class StatusService {
         return statusMapper.toResponse(savedStatus);
     }
 
-    public StatusResponse update(final StatusRequest statusRequest, final UUID id) {
+    public StatusResponse update(final StatusRequest statusRequest, final UUID id, HttpServletRequest request) {
         Status currentStatus = statusRepository.findByCandidateId(id)
                 .orElseThrow(() -> new StatusException("Status for Candidate Id: " + id + " not found"));
 
@@ -67,13 +68,15 @@ public class StatusService {
         updatedStatus = statusRepository.save(updatedStatus);
 
         if (updatedStatus.getStatusType().equals(StatusType.OFFERED)) {
+            String jwtToken = extractJwtFromRequest(request);
             notificationProducerService.sendMessageToNotificationMS(
                     new NotificationMessage(
                             "hiringNotificationTopicExchange",
                             "notification.offered",
                             updatedStatus.getId(),
                             updatedStatus.getCandidateId(),
-                            updatedStatus.getStatusType()
+                            updatedStatus.getStatusType(),
+                            jwtToken
                     )
             );
         }
@@ -86,5 +89,16 @@ public class StatusService {
             throw new StatusException("Status for Candidate Id: " + id + " not found");
         }
         statusRepository.deleteByCandidateId(id);
+    }
+
+
+
+    public String extractJwtFromRequest(HttpServletRequest request) {
+        String authHeader = request.getHeader("Authorization");
+
+        if (authHeader != null && authHeader.startsWith("Bearer ")) {
+            return authHeader.substring(7);
+        }
+        return null;
     }
 }
