@@ -28,10 +28,10 @@ public class BankInfoService {
 
     public BankInfoResponse getBankInfo(final UUID id) {
         return bankInfoMapper.toBankInfoResponse(
-                bankInfoRepository.findById(id)
+                bankInfoRepository.findByCandidateId(id)
                         .orElseThrow(
                                 () -> new BankInfoException(
-                                        "Bank info with id " + id + " not found"
+                                        "Bank info with Candidate id " + id + " not found"
                                 )
                         )
         );
@@ -55,7 +55,10 @@ public class BankInfoService {
 
     public BankInfoResponse updateBankInfo(final BankInfoRequest bankInfoRequest, final UUID id) {
         BankInfo bankInfo = bankInfoMapper.toBankInfo(bankInfoRequest);
-        bankInfo.setId(id);
+
+        BankInfo currentBankInfo = bankInfoRepository.findByCandidateId(id)
+                        .orElseThrow(() -> new BankInfoException("Bank info with Candidate id " + id + " not found"));
+        bankInfo.setId(currentBankInfo.getId());
 
         return bankInfoMapper.toBankInfoResponse(
                 bankInfoRepository.save(bankInfo)
@@ -63,9 +66,9 @@ public class BankInfoService {
     }
 
     public void deleteBankInfo(final UUID id) {
-        if (!bankInfoRepository.existsById(id)) {
-            throw new BankInfoException("Bank info with id " + id + " not found");
+        if (!bankInfoRepository.existsByCandidateId(id)) {
+            throw new BankInfoException("Bank info with Candidate id " + id + " not found");
         }
-        bankInfoRepository.deleteById(id);
+        bankInfoRepository.deleteByCandidateId(id);
     }
 }

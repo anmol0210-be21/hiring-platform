@@ -28,10 +28,10 @@ public class EducationInfoService {
 
     public EducationInfoResponse getEducationInfo(final UUID id) {
         return educationInfoMapper.toEducationInfoResponse(
-                educationInfoRepository.findById(id)
+                educationInfoRepository.findByCandidateId(id)
                         .orElseThrow(
                                 () -> new EducationInfoException(
-                                        "Education info with id " + id + " not found"
+                                        "Education info with Candidate id " + id + " not found"
                                 )
                         )
         );
@@ -55,7 +55,11 @@ public class EducationInfoService {
 
     public EducationInfoResponse updateEducationInfo(final EducationInfoRequest educationInfoRequest, final UUID id) {
         EducationInfo educationInfo = educationInfoMapper.toEducationInfo(educationInfoRequest);
-        educationInfo.setId(id);
+
+        EducationInfo currentEducationInfo = educationInfoRepository.findByCandidateId(id)
+                        .orElseThrow(() -> new EducationInfoException("Education info with Candidate id " + id + " not found"));
+
+        educationInfo.setId(currentEducationInfo.getId());
 
         return educationInfoMapper.toEducationInfoResponse(
                 educationInfoRepository.save(educationInfo)
@@ -63,9 +67,9 @@ public class EducationInfoService {
     }
 
     public void deleteEducationInfo(final UUID id) {
-        if (!educationInfoRepository.existsById(id)) {
-            throw new EducationInfoException("Education info with id " + id + " not found");
+        if (!educationInfoRepository.existsByCandidateId(id)) {
+            throw new EducationInfoException("Education info with Candidate id " + id + " not found");
         }
-        educationInfoRepository.deleteById(id);
+        educationInfoRepository.deleteByCandidateId(id);
     }
 }
