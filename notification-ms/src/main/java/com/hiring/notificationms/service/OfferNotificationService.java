@@ -58,6 +58,15 @@ public class OfferNotificationService {
                 .map(this::maptoOfferNotificationResponse).toList();
     }
 
+    public List<OfferNotificationResponse> getOfferNotificationsByCandidateId(final UUID candidateId) {
+        List<OfferNotification> offerNotifications = offerNotificationRepository
+                .findAllByCandidateId(candidateId)
+                .orElseThrow(() -> new RuntimeException("Candidate not found"));
+
+        return offerNotifications.stream()
+                .map(this::maptoOfferNotificationResponse).toList();
+    }
+
     private OfferNotificationResponse maptoOfferNotificationResponse(final OfferNotification offerNotification) {
         return new OfferNotificationResponse(
                 offerNotification.getId(),

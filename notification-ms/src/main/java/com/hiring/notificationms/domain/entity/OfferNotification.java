@@ -10,9 +10,6 @@ import java.util.UUID;
 
 @Entity
 @Data
-@Table(name = "offer_notification", uniqueConstraints = {
-        @UniqueConstraint(columnNames = "candidateId")
-})
 public class OfferNotification {
     @Id
     @GeneratedValue(generator = "uuid")
