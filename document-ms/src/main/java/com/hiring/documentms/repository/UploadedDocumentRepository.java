@@ -8,6 +8,6 @@ import java.util.Optional;
 import java.util.UUID;
 
 @Repository
-public interface UploadedDocumentRepository extends MongoRepository<UploadedDocument, UUID> {
+public interface UploadedDocumentRepository extends MongoRepository<UploadedDocument, String> {
     Optional<UploadedDocument> findByCandidateId(UUID candidateId);
 }

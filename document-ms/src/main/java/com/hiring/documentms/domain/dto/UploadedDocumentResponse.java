@@ -1,11 +1,15 @@
 package com.hiring.documentms.domain.dto;
 
+import java.time.LocalDateTime;
+import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 
 public record UploadedDocumentResponse(
-        UUID id,
+        String id,
         UUID candidateId,
+        LocalDateTime createdDate,
+        LocalDateTime lastModifiedDate,
         List<FileMetadataResponse> files
 ) {
 

@@ -1,17 +1,19 @@
 package com.hiring.candidatems.domain.entity;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
 import jakarta.validation.constraints.*;
 import lombok.Data;
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.annotation.LastModifiedDate;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.sql.Date;
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Entity
 @Data
+@EntityListeners(AuditingEntityListener.class)
 public class Candidate {
     @Id
     @GeneratedValue(generator = "uuid")
@@ -37,5 +39,12 @@ public class Candidate {
 
     @NotBlank(message = "City is required")
     private String city;
+
+    @CreatedDate
+    @Column(updatable = false)
+    private LocalDateTime createdDate;
+
+    @LastModifiedDate
+    private LocalDateTime lastModifiedDate;
 }
 

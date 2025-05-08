@@ -3,7 +3,11 @@ package com.hiring.candidatems.domain.entity;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.*;
 import lombok.Data;
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.annotation.LastModifiedDate;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Entity
@@ -11,6 +15,7 @@ import java.util.UUID;
 @Table(name = "bank_info", uniqueConstraints = {
         @UniqueConstraint(columnNames = "candidate_id")
 })
+@EntityListeners(AuditingEntityListener.class)
 public class BankInfo {
     @Id
     @GeneratedValue(generator = "uuid")
@@ -32,4 +37,12 @@ public class BankInfo {
     @NotBlank(message = "IFSC code must not be blank")
     @Pattern(regexp = "^[A-Z]{4}0[A-Z0-9]{6}$")
     private String ifscCode;
+
+
+    @CreatedDate
+    @Column(updatable = false)
+    private LocalDateTime createdDate;
+
+    @LastModifiedDate
+    private LocalDateTime lastModifiedDate;
 }

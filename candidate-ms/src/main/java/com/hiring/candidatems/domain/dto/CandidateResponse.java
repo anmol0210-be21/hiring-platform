@@ -1,6 +1,7 @@
 package com.hiring.candidatems.domain.dto;
 
 import java.sql.Date;
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 public record CandidateResponse(
@@ -11,6 +12,8 @@ public record CandidateResponse(
         String phone,
         Date dateOfBirth,
         String gender,
-        String city
+        String city,
+        LocalDateTime createdDate,
+        LocalDateTime lastModifiedDate
 ) {
 }

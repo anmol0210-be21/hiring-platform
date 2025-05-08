@@ -114,6 +114,8 @@ public class DocumentService {
         return new UploadedDocumentResponse(
                 uploadedDocument.getId(),
                 uploadedDocument.getCandidateId(),
+                uploadedDocument.getCreatedDate(),
+                uploadedDocument.getLastModifiedDate(),
                 fileResponses
         );
     }

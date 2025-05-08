@@ -71,7 +71,9 @@ public class OfferNotificationService {
         return new OfferNotificationResponse(
                 offerNotification.getId(),
                 offerNotification.getCandidateId(),
-                offerNotification.getSentAt()
+                offerNotification.getSentAt(),
+                offerNotification.getCreatedDate(),
+                offerNotification.getLastModifiedDate()
         );
     }
 }
