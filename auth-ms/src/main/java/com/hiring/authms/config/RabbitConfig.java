@@ -1,4 +1,4 @@
-package com.hiring.notificationms.config;
+package com.hiring.authms.config;
 
 import org.springframework.amqp.core.*;
 import org.springframework.amqp.rabbit.connection.ConnectionFactory;
@@ -28,25 +28,6 @@ public class RabbitConfig {
         template.setMessageConverter(jsonMessageConverter());
         return template;
     }
-
-    @Bean
-    public Queue notificationQueue() {
-        return new Queue("hiringNotificationQueue", true);
-    }
-
-    @Bean
-    public TopicExchange notificationTopicExchange() {
-        return new TopicExchange("hiringNotificationTopicExchange");
-    }
-
-    @Bean
-    public Binding notificationBinding() {
-        return BindingBuilder
-                .bind(notificationQueue())
-                .to(notificationTopicExchange())
-                .with("notification.*");
-    }
-
 
     @Bean
     public Queue otpQueue() {

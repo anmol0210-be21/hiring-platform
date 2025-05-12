@@ -3,6 +3,6 @@ package com.hiring.authms.domain.dto;
 import java.io.Serializable;
 
 public record AuthResponse(
-        String token
+        String message
 ) implements Serializable {
 }

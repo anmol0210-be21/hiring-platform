@@ -1,9 +1,6 @@
 package com.hiring.authms.controller;
 
-import com.hiring.authms.domain.dto.AuthRequest;
-import com.hiring.authms.domain.dto.AuthResponse;
-import com.hiring.authms.domain.dto.RegisterRequest;
-import com.hiring.authms.domain.dto.RegisterResponse;
+import com.hiring.authms.domain.dto.*;
 import com.hiring.authms.service.AuthService;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
@@ -34,5 +31,11 @@ public class AuthController {
     public ResponseEntity<RegisterResponse> register(@RequestBody @Valid final RegisterRequest registerRequest) {
         RegisterResponse registerResponse = authService.register(registerRequest);
         return new ResponseEntity<>(registerResponse, HttpStatus.OK);
+    }
+
+    @PostMapping("/verify-otp")
+    public ResponseEntity<VerifyOtpResponse> verifyOtp(@RequestBody @Valid final VerifyOtpRequest verifyOtpRequest) {
+        VerifyOtpResponse verifyOtpResponse = authService.verifyOtp(verifyOtpRequest);
+        return new ResponseEntity<>(verifyOtpResponse, HttpStatus.OK);
     }
 }

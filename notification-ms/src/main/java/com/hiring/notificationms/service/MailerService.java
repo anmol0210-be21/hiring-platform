@@ -1,6 +1,7 @@
 package com.hiring.notificationms.service;
 
 import com.hiring.notificationms.domain.dto.JobOfferEmail;
+import com.hiring.notificationms.domain.dto.OtpMessage;
 import com.hiring.notificationms.domain.entity.OfferNotification;
 import com.hiring.notificationms.repository.OfferNotificationRepository;
 import jakarta.mail.internet.MimeMessage;
@@ -30,6 +31,32 @@ public class MailerService {
         this.offerNotificationRepository = offerNotificationRepository;
     }
 
+
+    public void sendOtpMail(final OtpMessage otpMessage) {
+        try{
+            Context context = new Context();
+            context.setVariable("otp", otpMessage.otp());
+            context.setVariable("email", otpMessage.email());
+
+            String htmlContent = templateEngine.process("otp-email-template", context);
+
+            MimeMessage mimeMessage = mailSender.createMimeMessage();
+            MimeMessageHelper helper = new MimeMessageHelper(
+                    mimeMessage,
+                    true,
+                    StandardCharsets.UTF_8.name()
+            );
+            helper.setTo(otpMessage.email());
+            helper.setSubject("OTP Notification");
+            helper.setText(htmlContent, true);
+
+            mailSender.send(mimeMessage);
+        }
+        catch (Exception e){
+            log.error(e.toString());
+        }
+    }
+
     public void sendJobOfferMail(JobOfferEmail jobOfferEmail) {
         try{
             Context context = new Context();
@@ -48,7 +75,7 @@ public class MailerService {
 
             saveOfferNotification(jobOfferEmail.candidateId());
         } catch (Exception e) {
-            log.error(e.getMessage());
+            log.error(e.toString());
         }
     }
 
