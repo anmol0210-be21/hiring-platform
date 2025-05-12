@@ -33,7 +33,7 @@ public class AuthService {
 
     public AuthResponse login(AuthRequest authRequest) {
         try{
-            User user = authenticate(authRequest.username(), authRequest.password());
+            User user = authenticate(authRequest.email(), authRequest.password());
 
             return new AuthResponse(jwtUtil.generateToken(user));
         } catch (Exception e) {
@@ -45,7 +45,7 @@ public class AuthService {
         try{
             userDetailsRepository.save(userMapper.toUser(registerRequest));
 
-            User user = authenticate(registerRequest.username(), registerRequest.password());
+            User user = authenticate(registerRequest.email(), registerRequest.password());
             return new RegisterResponse(true, jwtUtil.generateToken(user));
         } catch (Exception e) {
             throw new RegisterException(e.getMessage());
@@ -56,7 +56,7 @@ public class AuthService {
         authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(username, password)
         );
-        return userDetailsRepository.findByUsername(username)
+        return userDetailsRepository.findByEmail(username)
                 .orElseThrow(() -> new LoginException("User not found"));
 
     }

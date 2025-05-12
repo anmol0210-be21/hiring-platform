@@ -19,7 +19,7 @@ public class User implements UserDetails {
     @GeneratedValue(generator = "uuid")
     private UUID id;
     @Column(unique = true)
-    private String username;
+    private String email;
     private String password;
     private String role;
 
@@ -35,7 +35,7 @@ public class User implements UserDetails {
 
     @Override
     public String getUsername() {
-        return username;
+        return email;
     }
 
     @Override

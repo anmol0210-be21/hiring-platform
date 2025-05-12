@@ -60,9 +60,9 @@ public class SecurityConfig {
     @Bean
     public CommandLineRunner createAdmin(PasswordEncoder passwordEncoder) {
         return args -> {
-            if (userDetailsRepository.findByUsername("admin123").isEmpty()) {
+            if (userDetailsRepository.findByEmail("admin@admin.com").isEmpty()) {
                 User admin = new User();
-                admin.setUsername("admin123");
+                admin.setEmail("admin@admin.com");
                 admin.setPassword(passwordEncoder.encode("admin123"));
                 admin.setRole("ADMIN");
                 userDetailsRepository.save(admin);
