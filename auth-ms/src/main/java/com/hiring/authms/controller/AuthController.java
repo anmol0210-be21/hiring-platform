@@ -38,4 +38,14 @@ public class AuthController {
         VerifyOtpResponse verifyOtpResponse = authService.verifyOtp(verifyOtpRequest);
         return new ResponseEntity<>(verifyOtpResponse, HttpStatus.OK);
     }
+
+    @PostMapping("/forgot-password")
+    public ResponseEntity<String> forgotPassword(@RequestBody @Valid final ForgotPasswordRequest forgotPasswordRequest) {
+        return new ResponseEntity<>(authService.forgetPassword(forgotPasswordRequest), HttpStatus.OK);
+    }
+
+    @PostMapping("/reset-password")
+    public ResponseEntity<Boolean> resetPassword(@RequestBody @Valid final ResetPasswordRequest resetPasswordRequest) {
+        return new ResponseEntity<>(authService.resetPassword(resetPasswordRequest), HttpStatus.OK);
+    }
 }

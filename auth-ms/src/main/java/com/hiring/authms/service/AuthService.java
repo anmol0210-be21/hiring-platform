@@ -10,6 +10,7 @@ import com.hiring.authms.service.producer.OtpProducerService;
 import com.hiring.authms.util.JwtUtil;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.security.SecureRandom;
@@ -24,17 +25,20 @@ public class AuthService {
     private final UserDetailsRepository userDetailsRepository;
     private final UserMapper userMapper;
     private final OtpProducerService otpProducerService;
+    private final PasswordEncoder passwordEncoder;
 
     public AuthService(final JwtUtil jwtUtil,
                        final AuthenticationManager authenticationManager,
                        final UserDetailsRepository userDetailsRepository,
                        final UserMapper userMapper,
-                       final OtpProducerService otpProducerService) {
+                       final OtpProducerService otpProducerService,
+                       final PasswordEncoder passwordEncoder) {
         this.jwtUtil = jwtUtil;
         this.authenticationManager = authenticationManager;
         this.userDetailsRepository = userDetailsRepository;
         this.userMapper = userMapper;
         this.otpProducerService = otpProducerService;
+        this.passwordEncoder = passwordEncoder;
     }
 
     public AuthResponse login(AuthRequest authRequest) {
@@ -84,11 +88,47 @@ public class AuthService {
         && otpCache.get(email).equals(otp)) {
             User user = userDetailsRepository.findByEmail(email)
                     .orElseThrow(() -> new RuntimeException("User not found"));
-
+            otpCache.remove(email);
             return new VerifyOtpResponse(true, jwtUtil.generateToken(user));
         }
         return new VerifyOtpResponse(false, null);
     }
+
+    public String forgetPassword(ForgotPasswordRequest forgotPasswordRequest){
+        String email = forgotPasswordRequest.email();
+
+        User user = userDetailsRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        String otp = generateOtp();
+        otpCache.put(forgotPasswordRequest.email(), otp);
+        otpProducerService.sendMessageToNotificationMS(new OtpMessage(
+                "hiringAuthOtpTopicExchange",
+                "auth.otp",
+                email,
+                otp
+        ));
+
+        return "OTP sent to " + email;
+    }
+
+    public boolean resetPassword(ResetPasswordRequest resetPasswordRequest){
+        String email = resetPasswordRequest.email();
+        String otp = resetPasswordRequest.otp();
+        String newPassword = passwordEncoder.encode(resetPasswordRequest.newPassword());
+
+        if (otpCache.getOrDefault(email, null) != null
+        && otpCache.get(email).equals(otp)) {
+            User user = userDetailsRepository.findByEmail(email)
+                    .orElseThrow(() -> new RuntimeException("User not found"));
+            user.setPassword(newPassword);
+            userDetailsRepository.save(user);
+            otpCache.remove(email);
+            return true;
+        }
+        return false;
+    }
+
 
     private User authenticate(String username, String password) {
         authenticationManager.authenticate(
