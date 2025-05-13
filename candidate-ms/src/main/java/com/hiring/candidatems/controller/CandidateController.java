@@ -46,4 +46,9 @@ public class CandidateController {
         candidateService.delete(id);
         return new ResponseEntity<>(HttpStatus.OK);
     }
+
+    @GetMapping("/count")
+    public ResponseEntity<String> getCandidateCount() {
+        return new ResponseEntity<>(candidateService.count(), HttpStatus.OK);
+    }
 }

@@ -82,4 +82,9 @@ public class CandidateService {
         }
         candidateRepository.deleteById(id);
     }
+
+    public String count(){
+        long count = candidateRepository.count();
+        return "Number of candidates: " + count;
+    }
 }
