@@ -13,11 +13,6 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import java.security.SecureRandom;
-import java.util.Map;
-import java.util.Random;
-import java.util.concurrent.ConcurrentHashMap;
-
 @Service
 public class AuthService {
     private final JwtUtil jwtUtil;
@@ -26,26 +21,28 @@ public class AuthService {
     private final UserMapper userMapper;
     private final OtpProducerService otpProducerService;
     private final PasswordEncoder passwordEncoder;
+    private final OtpService otpService;
 
     public AuthService(final JwtUtil jwtUtil,
                        final AuthenticationManager authenticationManager,
                        final UserDetailsRepository userDetailsRepository,
                        final UserMapper userMapper,
                        final OtpProducerService otpProducerService,
-                       final PasswordEncoder passwordEncoder) {
+                       final PasswordEncoder passwordEncoder,
+                       final OtpService otpService) {
         this.jwtUtil = jwtUtil;
         this.authenticationManager = authenticationManager;
         this.userDetailsRepository = userDetailsRepository;
         this.userMapper = userMapper;
         this.otpProducerService = otpProducerService;
         this.passwordEncoder = passwordEncoder;
+        this.otpService = otpService;
     }
 
     public AuthResponse login(AuthRequest authRequest) {
         try{
             User user = authenticate(authRequest.email(), authRequest.password());
-            String otp = generateOtp();
-            otpCache.put(authRequest.email(), otp);
+            String otp = otpService.generateOtp(authRequest.email());
 
             otpProducerService.sendMessageToNotificationMS(new OtpMessage(
                     "hiringAuthOtpTopicExchange",
@@ -65,8 +62,7 @@ public class AuthService {
 
             User user = authenticate(registerRequest.email(), registerRequest.password());
 
-            String otp = generateOtp();
-            otpCache.put(registerRequest.email(), otp);
+            String otp = otpService.generateOtp(registerRequest.email());
 
             otpProducerService.sendMessageToNotificationMS(new OtpMessage(
                     "hiringAuthOtpTopicExchange",
@@ -84,11 +80,11 @@ public class AuthService {
         String email = verifyOtpRequest.email();
         String otp = verifyOtpRequest.otp();
 
-        if (otpCache.getOrDefault(email, null) != null
-        && otpCache.get(email).equals(otp)) {
+        if (otpService.validateOtp(email, otp)){
             User user = userDetailsRepository.findByEmail(email)
-                    .orElseThrow(() -> new RuntimeException("User not found"));
-            otpCache.remove(email);
+                    .orElseThrow(() -> new RuntimeException("User with email " + email + " not found"));
+
+            otpService.deleteOtp(email);
             return new VerifyOtpResponse(true, jwtUtil.generateToken(user));
         }
         return new VerifyOtpResponse(false, null);
@@ -100,8 +96,8 @@ public class AuthService {
         User user = userDetailsRepository.findByEmail(email)
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
-        String otp = generateOtp();
-        otpCache.put(forgotPasswordRequest.email(), otp);
+        String otp = otpService.generateOtp(forgotPasswordRequest.email());
+
         otpProducerService.sendMessageToNotificationMS(new OtpMessage(
                 "hiringAuthOtpTopicExchange",
                 "auth.otp",
@@ -117,13 +113,12 @@ public class AuthService {
         String otp = resetPasswordRequest.otp();
         String newPassword = passwordEncoder.encode(resetPasswordRequest.newPassword());
 
-        if (otpCache.getOrDefault(email, null) != null
-        && otpCache.get(email).equals(otp)) {
+        if (otpService.validateOtp(email, otp)){
             User user = userDetailsRepository.findByEmail(email)
-                    .orElseThrow(() -> new RuntimeException("User not found"));
+                    .orElseThrow(() -> new RuntimeException("User with email " + email + " not found"));
+            otpService.deleteOtp(email);
             user.setPassword(newPassword);
             userDetailsRepository.save(user);
-            otpCache.remove(email);
             return true;
         }
         return false;
@@ -136,19 +131,5 @@ public class AuthService {
         );
         return userDetailsRepository.findByEmail(username)
                 .orElseThrow(() -> new LoginException("User not found"));
-
     }
-
-
-
-    private final Map<String, String> otpCache = new ConcurrentHashMap<>();
-    private String generateOtp() {
-        StringBuilder otp = new StringBuilder();
-        Random random = new SecureRandom();
-        for (int i = 0; i < 6; i++) {
-            otp.append(random.nextInt(10));
-        }
-        return otp.toString();
-    }
-
 }
