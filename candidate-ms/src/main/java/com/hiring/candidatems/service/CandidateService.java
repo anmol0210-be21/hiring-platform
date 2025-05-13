@@ -10,6 +10,9 @@ import com.hiring.candidatems.exception.CandidateException;
 import com.hiring.candidatems.repository.CandidateRepository;
 import com.hiring.candidatems.service.producer.DocumentProducerService;
 import com.hiring.candidatems.service.producer.StatusProducerService;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.CachePut;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -40,6 +43,7 @@ public class CandidateService {
                 .toList();
     }
 
+    @Cacheable(value = "candidates", key = "#id")
     public CandidateResponse findById(final UUID id) {
         return candidateMapper.toCandidateResponse(
                 candidateRepository.findById(id).orElseThrow(
@@ -69,6 +73,7 @@ public class CandidateService {
         return candidateMapper.toCandidateResponse(candidate);
     }
 
+    @CachePut(value = "candidates", key = "#id")
     public CandidateResponse update(final CandidateRequest request, final UUID id) {
         Candidate candidate = candidateMapper.toCandidate(request);
         candidate.setId(id);
@@ -76,6 +81,7 @@ public class CandidateService {
         return candidateMapper.toCandidateResponse(candidate);
     }
 
+    @CacheEvict(value = "candidates", key = "#id")
     public void delete(final UUID id) {
         if (!candidateRepository.existsById(id)) {
             throw new CandidateException("Could not find candidate with id: " + id);
